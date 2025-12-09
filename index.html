@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruleta de Prompts - Cápsula 2 IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Dosis', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .ruleta-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            width: 350px;
+            height: 350px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 15px solid #667eea;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            background: conic-gradient(
+                from 0deg,
+                #ff6b6b 0deg 45deg,
+                #4ecdc4 45deg 90deg,
+                #ffe66d 90deg 135deg,
+                #a8e6cf 135deg 180deg,
+                #ff8b94 180deg 225deg,
+                #c7ceea 225deg 270deg,
+                #ffd3b6 270deg 315deg,
+                #98d8c8 315deg 360deg
+            );
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .wheel::before {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .wheel::after {
+            content: '🎯';
+            position: absolute;
+            font-size: 40px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 11;
+        }
+
+        .arrow {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-top: 40px solid #ff6b6b;
+            z-index: 100;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        .spin-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.3em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Dosis', sans-serif;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .spin-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        .spin-button:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .spin-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .result-card p {
+            color: #444;
+            font-size: 1.15em;
+            line-height: 1.6;
+        }
+
+        .consigna-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        .tips {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+
+        .tips h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .tips ul {
+            margin-left: 20px;
+            color: #856404;
+        }
+
+        .tips li {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .counter {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .wheel-wrapper {
+                width: 280px;
+                height: 280px;
+            }
+
+            .spin-button {
+                padding: 15px 35px;
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Ruleta de Prompts</h1>
+        <p class="subtitle">¡Gira la ruleta y descubre tu desafío de prompting!</p>
+
+        <div class="ruleta-container">
+            <div class="wheel-wrapper">
+                <div class="arrow"></div>
+                <div class="wheel" id="wheel"></div>
+            </div>
+
+            <button class="spin-button" id="spinButton">¡GIRAR RULETA!</button>
+            
+            <p class="counter">Desafíos completados: <strong><span id="counter">0</span>/8</strong></p>
+        </div>
+
+        <div class="result-card" id="resultCard">
+            <h2><span class="consigna-number" id="consignaNumber">1</span><span id="resultTitle">Tu desafío</span></h2>
+            <p id="resultText"></p>
+        </div>
+
+        <div class="tips">
+            <h3>💡 Recordá incluir en tu prompt:</h3>
+            <ul>
+                <li><strong>Contexto:</strong> información clave que la IA necesita saber</li>
+                <li><strong>Instrucción clara:</strong> qué querés que haga exactamente</li>
+                <li><strong>Formato deseado:</strong> cómo querés recibir la respuesta</li>
+                <li><strong>Restricciones:</strong> qué debe evitar o incluir obligatoriamente</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const consignas = [
+            {
+                title: "Herramienta para imágenes IA",
+                text: "Pedile a la IA una recomendación de herramienta gratuita para generar imágenes con inteligencia artificial. Especificá qué tipo de imágenes te interesan (ilustraciones, fotografías realistas, arte abstracto, etc.) y si necesitás alguna funcionalidad particular."
+            },
+            {
+                title: "Menú semanal personalizado",
+                text: "Solicitá un menú semanal nutritivo que excluya alimentos que no te gusten. Aclará cuáles son esos alimentos, si tenés alguna preferencia (vegetariano, con mucha proteína, bajo en carbohidratos) y cualquier restricción alimentaria que debas considerar."
+            },
+            {
+                title: "Versos al estilo de...",
+                text: "Pedile que escriba versos que imiten el estilo de tus artistas favoritos (como Catriel y Paco Amoroso, o los que prefieras). Indicá sobre qué temática querés los versos y qué elementos del estilo de esos artistas te gustaría que capture."
+            },
+            {
+                title: "Organizador de tareas",
+                text: "Solicitá un cuadro para organizar las entregas de tareas por materia. Especificá cuántas materias tenés, qué información necesitás en cada columna (fecha de entrega, prioridad, estado, etc.) y en qué formato preferís recibirlo."
+            },
+            {
+                title: "Texto para redes sociales",
+                text: "Pedile un texto para una publicación en redes sociales que promocione un producto de tu emprendimiento (o uno inventado). Definí qué estás promocionando, a quién va dirigido, qué red social usarás, el tono deseado y la extensión aproximada."
+            },
+            {
+                title: "Nombres para equipo",
+                text: "Solicitá opciones de nombres creativos para un equipo que armaste con amistades. Especificá de qué deporte o actividad se trata, qué onda buscan (divertida, seria, intimidante), y si hay algún concepto, chiste interno o referencia que los identifique."
+            },
+            {
+                title: "Recomendaciones de series",
+                text: "Pedile sugerencias de series personalizadas basadas en tus gustos. Mencioná tus 3 series favoritas y explicá qué es lo que más te gusta de cada una (la trama, los personajes, el humor, el drama, etc.) para que las recomendaciones sean más acertadas."
+            },
+            {
+                title: "Guión para podcast",
+                text: "Solicitá el guión básico para un podcast sobre un tema que te apasiona. Definí el tema específico, la duración aproximada del episodio, el tono (educativo, conversacional, humorístico), y si es un episodio único o parte de una serie."
+            }
+        ];
+
+        let usedConsignas = new Set();
+        let spinning = false;
+        const wheel = document.getElementById('wheel');
+        const spinButton = document.getElementById('spinButton');
+        const resultCard = document.getElementById('resultCard');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultText = document.getElementById('resultText');
+        const consignaNumber = document.getElementById('consignaNumber');
+        const counter = document.getElementById('counter');
+
+        function getRandomConsigna() {
+            const availableIndices = consignas
+                .map((_, index) => index)
+                .filter(index => !usedConsignas.has(index));
+
+            if (availableIndices.length === 0) {
+                usedConsignas.clear();
+                return Math.floor(Math.random() * consignas.length);
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableIndices.length);
+            return availableIndices[randomIndex];
+        }
+
+        function spinWheel() {
+            if (spinning) return;
+
+            spinning = true;
+            spinButton.disabled = true;
+            resultCard.classList.remove('show');
+
+            const selectedIndex = getRandomConsigna();
+            const rotations = 5 + Math.random() * 3; // 5-8 vueltas completas
+            const segmentAngle = 360 / 8;
+            const targetAngle = (selectedIndex * segmentAngle) + (segmentAngle / 2);
+            const totalRotation = (rotations * 360) + targetAngle;
+
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+
+            setTimeout(() => {
+                usedConsignas.add(selectedIndex);
+                counter.textContent = usedConsignas.size;
+                
+                const selected = consignas[selectedIndex];
+                consignaNumber.textContent = selectedIndex + 1;
+                resultTitle.textContent = selected.title;
+                resultText.textContent = selected.text;
+                resultCard.classList.add('show');
+
+                spinning = false;
+                spinButton.disabled = false;
+
+                if (usedConsignas.size === 8) {
+                    spinButton.textContent = '🎉 ¡Completaste todos! Girar de nuevo';
+                }
+            }, 4000);
+        }
+
+        spinButton.addEventListener('click', spinWheel);
+
+        // Easter egg: doble click para resetear
+        spinButton.addEventListener('dblclick', () => {
+            usedConsignas.clear();
+            counter.textContent = '0';
+            spinButton.textContent = '¡GIRAR RULETA!';
+        });
+    </script>
+</body>
+</html>
